@@ -1,0 +1,39 @@
+{
+    "name": "Get Your Ass to Mars",
+    "author": "Indie Imprint",
+    "site": "https://www.indieimprint.com",
+    "copyright": "Copyright © 2018, 2019 Indie Imprint",
+    "intro": {
+    	"text": "This is the story of the game. \n\nBlah blah blah ",
+    	"full": true
+    },
+    "1": {
+    	"title": "Get Your Ass to Mars",
+    	"full": false
+    },
+    "2": {
+    	"title": "Get Your Ass to Mars",
+    	"full": false
+    },
+    "3": {
+    	"title": "Get Your Ass to Mars",
+    	"full": false
+    },
+    "4": {
+    	"title": "Get Your Ass to Mars",
+    	"full": false
+    },
+    "5": {
+    	"title": "Get Your Ass to Mars",
+    	"full": false
+    },
+    "death": {
+    	"title": "Get Your Ass to Mars",
+    	"full": true
+    },
+    "win": {
+    	"title": "Get Your Ass to Mars",
+    	"full": true
+    }
+    
+}
