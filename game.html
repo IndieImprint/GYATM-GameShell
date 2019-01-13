@@ -40,6 +40,7 @@
 	let keypad;
 	let uiMatsTxt;
 	let uiDialogTxt;
+	let uiDialogTitle
 	let uiMessageTxt;
 	let uiBuildTxt;
 	let uiBuildIcon1;
@@ -51,20 +52,28 @@
 	let menuBuild;
 	let menuDialog;
 	let menuMessage;
+	let menuBCE;
 	let iron;
 	let dilithium;
 	let ice;
 	let beryllium;
 	let score = 0;
-	let matFe = 100;
-	let matLi2 = 0;
-	let matH2O = 0;
-	let matBe = 0;
+	let matFe = 22;
+	let matLi2 = 20;
+	let matH2O = 25;
+	let matBe = 20;
 	let story;
+	let storyIntro = 1;
 	let assemblies;
 	let occupiedLotsX = []; // JS has no 2D array, so we'll use the array entry num for X (or Y), and 0/1 for occupied
 	let occupiedLotsY = [];
 	let runningMode = false;
+	let turn = 30;
+	let turnText;
+	let bceActive;
+	let bosonCloud;
+	let shuttle;
+	let landing = 0;
 	
 	const config = {
 		type: Phaser.AUTO,
@@ -128,26 +137,30 @@
 		
 		
 		// Assets
-		this.load.image('desert', 'assets/Desert.png'); // Tileset size 16
-		this.load.image('star', 'assets/star.png');
+		this.load.image('megasheet', 'assets/megasheet.png'); // Tileset size 16
 		this.load.image('gui-screen', 'assets/gui-screen-256.png');
 		this.load.image('gui-icon', 'assets/gui-icon-128.png');
+		this.load.image('mine1', 'assets/mine1.png');
+		this.load.image('mine2', 'assets/mine2.png');
+		this.load.image('bce', 'assets/bce.png');
+		this.load.image('bosoncloud', 'assets/bosoncloud.png');
+		this.load.image('shuttle', 'assets/shuttle.png');
 		this.load.tilemapTiledJSON('map', 'assets/marsmap.json');
 		this.load.spritesheet('avatar', 'assets/astronaut.png', { frameWidth: 32, frameHeight: 32 });
-		this.load.spritesheet('resources', 'assets/Desert.png', { frameWidth: 16, frameHeight: 16 });
-		this.load.spritesheet('starter', 'assets/starter.png', { frameWidth: 80, frameHeight: 60 });
+		this.load.spritesheet('resources', 'assets/megasheet.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('starter', 'assets/megasheet.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('boom', 'assets/boom.png', { frameWidth: 150, frameHeight: 150 });
 		this.load.json('story', 'assets/story.json');
 		this.load.json('map','controls.json');
-		this.load.json('assemblies','assemblies.json');
+		this.load.json('assemblies','assets/assemblies.json');
 		this.load.audio('click', 'assets/click3.wav');
 		this.load.audio('turn', 'assets/on.wav');
-		this.load.audio('door', 'assets/on.wav');
 	}
 
 	function create () {
 		// Map creation
 		map					= this.make.tilemap({ key: 'map' });
-		const tileset		= map.addTilesetImage('Desert', 'desert');
+		const tileset		= map.addTilesetImage('megasheet', 'megasheet');
 		const belowLayer	= map.createStaticLayer('ground', tileset, 0, 0);
 		const worldLayer	= map.createStaticLayer('edges', tileset, 0, 0);
 		const decorLayer	= map.createStaticLayer('decor', tileset, 0, 0);
@@ -159,6 +172,7 @@
 		this.physics.world.on('worldbounds', onWorldBounds);
 		
 		
+		
 		// Camera settings
 		camera = this.cameras.main;
 		camera.setZoom(dZoom);
@@ -167,7 +181,7 @@
 		// Load Story and Structures
 		story = this.cache.json.get('story');
 		assemblies = this.cache.json.get('assemblies');
-		console.log(story.intro);
+		//console.log(story.intro);
 		
 		// Gameshell keypad controls
 		cursors = this.input.keyboard.createCursorKeys();
@@ -186,9 +200,18 @@
 			fill: '#ffffff'
 		});
 		
+		// Turn Text timer
+		turn = story.turns;
+		let uiTurnBg1 = this.add.image(dWidth+55, -40, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(0.35,0.35).setDepth(1);
+		turnText = this.add.text(dWidth+55, -40, turn, {
+			font: "24px 'PT Sans'",
+			align: 'center',
+			color: 'white'
+		}).setScrollFactor(0).setOrigin(0.5,0.5).setDepth(1);
+		
 		// Materials Menu
 		menuMats = this.add.container();
-		let uiMatsBg = this.add.image(69, 315, 'gui-screen').setOrigin(0.5).setScrollFactor(0).setScale(1.3, 0.25);
+		let uiMatsBg = this.add.image(dWidth/2, 315, 'gui-screen').setOrigin(0.5).setScrollFactor(0).setScale(5, 0.25);
 		uiMatsTxt = this.add.text(-90, 290, 'Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe, { 
 			font: "25px 'PT Sans'",
 			color: 'white'
@@ -211,22 +234,22 @@
 
 		// Large Dialog Menu
 		menuDialog = this.add.container();
-		let uiDialogBg = this.add.image(dWidth/2, dHeight/2, 'gui-screen').setOrigin(0.5,0.5).setScrollFactor(0).setScale(1.5, 1.5);
-		let uiDialogTitle = this.add.text(dWidth/2, uiDialogBg.height+32, "Press B to close", {
+		let uiDialogBg = this.add.image(dWidth/2, dHeight/2, 'gui-screen').setOrigin(0.5,0.5).setScrollFactor(0).setScale(1.8, 1.5);
+		uiDialogTitle = this.add.text(dWidth/2, uiDialogBg.height+32, "Press A for next", {
 			font: "24px 'PT Sans'",
 			align: 'center',
 			color: 'white'
 		}).setScrollFactor(0).setOrigin(0.5,0.5);
-		uiDialogTxt = this.add.text(dWidth/2,10, story.intro.text, { 
-			font: "30px 'PT Sans'",
+		uiDialogTxt = this.add.text(dWidth/2,(dHeight/2) -10, story.intro.text, { 
+			font: "28px 'PT Sans'",
 			align: 'center',
 			color: 'white',
-			wordWrap: { width: uiDialogBg.width }
+			wordWrap: { width: dWidth }
 		}).setScrollFactor(0).setOrigin(0.5,0.5);
 		menuDialog.add(uiDialogBg);
 		menuDialog.add(uiDialogTitle);
 		menuDialog.add(uiDialogTxt);
-		menuDialog.setDepth(1);
+		menuDialog.setDepth(2);
 		
 		// Small Dialog Menu
 		menuMessage = this.add.container();
@@ -237,7 +260,7 @@
 			color: 'white'
 		}).setScrollFactor(0).setOrigin(0.5,0.5);
 		uiMessageTxt = this.add.text(dWidth/2,(dHeight/2)-10, "Message", { 
-			font: "30px 'PT Sans'",
+			font: "26px 'PT Sans'",
 			align: 'center',
 			color: 'white',
 			wordWrap: { width: (uiMessageBg.width -4)  }
@@ -245,7 +268,7 @@
 		menuMessage.add(uiMessageBg);
 		menuMessage.add(uiMessageTitle);
 		menuMessage.add(uiMessageTxt);
-		menuMessage.setDepth(1);
+		menuMessage.setDepth(2);
 		menuMessage.visible = false;
 		
 		// Build Menu
@@ -264,8 +287,8 @@
 		}).setScrollFactor(0).setOrigin(0.5,0.5);
 		let uiBuildIconBg1 = this.add.image(65, uiBuildBg.height -65, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1);
 		let uiBuildIconBg2 = this.add.image(uiBuildBg.width, uiBuildBg.height -65, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1);	
-		uiBuildIcon1 = this.add.image(65, uiBuildBg.height -70, assemblies.starter.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1);
-		uiBuildIcon2 = this.add.image(uiBuildBg.width, uiBuildBg.height -70, assemblies.starter.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1);
+		uiBuildIcon1 = this.add.image(65, uiBuildBg.height -68, assemblies.mine.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
+		uiBuildIcon2 = this.add.image(uiBuildBg.width, uiBuildBg.height -68, assemblies.gorignak.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
 		menuBuild.add(uiBuildBg);
 		menuBuild.add(uiBuildIconBg1);
 		menuBuild.add(uiBuildIconBg2);
@@ -273,8 +296,32 @@
 		menuBuild.add(uiBuildIcon2);
 		menuBuild.add(uiBuildTitle);
 		menuBuild.add(uiBuildTxt);
-		menuBuild.setDepth(1);
+		menuBuild.setDepth(2);
 		menuBuild.visible = false;
+		
+		// BCE Menu
+		menuBCE = this.add.container();
+		let uiBCEBg = this.add.image(dWidth/2, dHeight/2, 'gui-screen').setOrigin(0.5,0.5).setScrollFactor(0).setScale(1.5, 1.5);
+		let uiBCETitle = this.add.text(dWidth/2, uiBCEBg.height+32, "Press A to Build", {
+			font: "24px 'PT Sans'",
+			align: 'center',
+			color: 'white'
+		}).setScrollFactor(0).setOrigin(0.5,0.5);
+		let uiBCETxt = this.add.text(dWidth/2,35, story.bce_build.text, { 
+			font: "24px 'PT Sans'",
+			align: 'center',
+			color: 'white',
+			wordWrap: { width: uiBCEBg.width }
+		}).setScrollFactor(0).setOrigin(0.5,0.5);
+		let uiBCEIconBg = this.add.image(dWidth/2, uiBCEBg.height -65, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1);	
+		let uiBCEIcon = this.add.image(dWidth/2, uiBCEBg.height -68, assemblies.bce.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
+		menuBCE.add(uiBCEBg);
+		menuBCE.add(uiBCEIconBg);
+		menuBCE.add(uiBCEIcon);
+		menuBCE.add(uiBCETitle);
+		menuBCE.add(uiBCETxt);
+		menuBCE.setDepth(2);
+		menuBCE.visible = false;
 		
 
 		if(debugCollision) {
@@ -326,18 +373,22 @@
 			repeat: -1
 		});
 		
-		// Set up assemblies and structures.	
-		structures = this.physics.add.group();
-		this.physics.add.collider(player, structures, onTouchStructure, false, this);
-		//structures.create( 96, 128, assemblies.starter.asset).setImmovable().name = [assemblies.starter, 100];
+		// Set up assemblies and structures.
+		bosonCloud = this.add.image(-48, -48, 'bosoncloud').setOrigin(0.5,0.5).setScale(0.5,0.5).setDepth(1).setAlpha(0.15);
+		shuttle = this.physics.add.sprite(-48, -48, 'shuttle').setOrigin(0.5,0.5).setScale(1.5,1.5).setDepth(1);
 		this.anims.create({
-			key: 'dome_door',
-			frames: this.anims.generateFrameNumbers(assemblies.starter.asset, { start: 0, end: 9 }),
+			key: 'boom',
+			frames: this.anims.generateFrameNumbers('boom', { start: 0, end: 10 }),
 			frameRate: 10,
 			repeat: 0
-		});
+		});	
+		structures = this.physics.add.group();
+		this.physics.add.collider(player, structures, false, false, this);
+		// This is just for the code - the structure is actually placed via the tilesheet, so we'll put this off the map
+		structures.create( -48, -48, assemblies.starter.asset).setImmovable().name = [assemblies.starter, 100];
+		
 		// Populate entries with 0 to layout the size of the array, and also to provide a clean top to the map.
-		let entries = Math.round(map.widthInPixels)/96;
+		let entries = Math.round(map.widthInPixels)/64;
 		for(let i = 0; i < entries; i++){
 			occupiedLotsX.push(0);
 		}
@@ -345,7 +396,6 @@
 		for(let i = 0; i < entries; i++){
 			occupiedLotsY.push(0);
 		}
-		//console.log("There are " + occupiedLots.length + " entries in the array");
 
 		
 		// Seed map with resources
@@ -353,30 +403,29 @@
 		dilithium = this.physics.add.group();
 		ice = this.physics.add.group();
 		beryllium = this.physics.add.group();
-		adamantium = this.physics.add.group();
 		for(let i = 0; i < 10; i++) {
-			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width);
-			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height);
+			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
+			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
 			// Params are x, y, asset map, and asset id
-			iron.create(x, y, 'resources', 335);   
+			iron.create(x, y, 'resources', 11);   
 		}			   
-		for(let i = 0; i < 3; i++) {
-			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width);
-			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height);
+		for(let i = 0; i < 5; i++) {
+			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
+			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
 			// Params are x, y, asset map, and asset id
-			dilithium.create(x, y, 'resources', 334);   
+			dilithium.create(x, y, 'resources', 74);   
 		}	 
 		for(let i = 0; i < 8; i++) {
-			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width);
-			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height);
+			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
+			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
 			// Params are x, y, asset map, and asset id
-			ice.create(x, y, 'resources', 349);
+			ice.create(x, y, 'resources', 27);
 		}			   
 		for(let i = 0; i < 3; i++) {
-			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width);
-			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height);
+			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
+			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
 			// Params are x, y, asset map, and asset id
-			beryllium.create(x, y, 'resources', 351);   
+			beryllium.create(x, y, 'resources', 58);   
 		}		   
 		this.physics.add.overlap(player, iron, onFindIron, false, this);
 		this.physics.add.overlap(player, dilithium, onFindDilithium, false, this);
@@ -384,14 +433,13 @@
 		this.physics.add.overlap(player, beryllium, onFindBeryllium, false, this);
 		
 		// Start the turn timer
-		setInterval(onTurn.bind(this), 60000);	   
+		setInterval(onTurn.bind(this), 60000);	 
+	  
 	}
+		
 	
 	
-	
-	
-	
-	// Events
+//////// Events
 	
 	function onWorldBounds (body) {
 		centerText.setText("Game Over ");
@@ -399,45 +447,43 @@
 		centerText.x = body.center.x -140;
 		centerText.update;
 	}
-	function onTouchStructure (player, structure){
-		// Add the ability to interact with structure if there is time
-		console.log("Impacted structure " + JSON.stringify(structure));
-		structure.anims.play('dome_door', false);
-		this.sound.play('door');		
-	}
 	
 	// Resource events
 	function onFindIron (player, resource) {
 		// Move the resource to a new place
-		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width);
-		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height);
+		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
+		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
 		this.sound.play('click');	
-		// shake the world
-		//camera.shake(300);
-		//camera.flash(50);
-		//camera.fade(100);
 		matFe++;
+		uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
+		uiMatsTxt.update;
 	}
 	function onFindDilithium (player, resource) {
 		// Move the resource to a new place
-		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width);
-		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height);			
+		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
+		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);			
 		this.sound.play('click');
 		matLi2++;
+		uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
+		uiMatsTxt.update;
 	}
 	function onFindIce (player, resource) {
 		// Move the resource to a new place
-		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width);
-		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height);
+		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
+		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
 		this.sound.play('click');
 		matH2O++;
+		uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
+		uiMatsTxt.update;
 	}
 	function onFindBeryllium (player, resource) {
 		// Move the resource to a new place
-		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width);
-		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height);
+		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
+		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
 		this.sound.play('click');
 		matBe++;
+		uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
+		uiMatsTxt.update;
 	}
 	
 	// Utility Functions
@@ -450,7 +496,7 @@
 			openDialog("Structure would be off the map", 1);
 		} else {
 			// Tried a lot of things to prevent overlap, what ended up working best is a simple checkerboard type layout.
-			let squareX = Math.round(player.x/96);
+			let squareX = Math.round(player.x/100);
 			let squareY = Math.round(bufferY/64);
 			console.log("Lot for player structure would be X:" + squareX + " Y:" + squareY + " And that array entry is: " + occupiedLotsX[squareX] + " , " + occupiedLotsY[squareY]);
 			if( (occupiedLotsX[squareX] == 0) || (occupiedLotsY[squareY] == 0) ){
@@ -460,6 +506,13 @@
 					occupiedLotsX[squareX] = 1;
 					occupiedLotsY[squareY] = 1;
 					matFe -= buildNext.cost;
+					if( buildNext == assemblies.bce ){
+						matLi2 -= buildNext.cost;
+						matBe -= buildNext.cost;
+						matH2O -= buildNext.cost;
+						bceActive = true;
+						bosonCloud.setPosition(player.x,bufferY);
+					}
 				} else {
 					openDialog(buildNext.title + " costs " + buildNext.cost + "Fe. \nYou only have " + matFe, 1);
 				}
@@ -472,31 +525,83 @@
 	
 	// Timer Events (Turns, etc)
 	function onTurn() {
-		structures.children.iterate(function (structure) {
-			console.log(JSON.stringify(structure.name[0].title + ' Health: ' + structure.name[1] + "%"));
+		if( !menuDialog.visible ){
+			// Skip the turn timer if the main dialog is open
+			structures.children.iterate(function (structure) {
+				console.log(JSON.stringify(structure.name[0].title + ' Health: ' + structure.name[1] + "%"));
 			
-			// Assembly production
-			console.log(structure.name[0].title + " Fe:" + structure.name[0].production.Fe);
-			matFe += structure.name[0].production.Fe;
-			matLi2 += structure.name[0].production.Li2;
-			matH2O += structure.name[0].production.H2O;
-			matBe += structure.name[0].production.Be;
+				// Assembly production
+				console.log(structure.name[0].title + " Fe:" + structure.name[0].production.Fe);
+				matFe += structure.name[0].production.Fe;
+				matLi2 += structure.name[0].production.Li2;
+				matH2O += structure.name[0].production.H2O;
+				matBe += structure.name[0].production.Be;
 			
-			// Assembly maint cost
-			matFe -= structure.name[0].maint.Fe;
-			matLi2 -= structure.name[0].maint.Li2;
-			matH2O -= structure.name[0].maint.H2O;
-			matBe -= structure.name[0].maint.Be;	
-    	});
-		this.sound.play('turn');
-		console.log("Updated structures");
+				// Assembly maint cost
+				matFe -= structure.name[0].maint.Fe;
+				matLi2 -= structure.name[0].maint.Li2;
+				matH2O -= structure.name[0].maint.H2O;
+				matBe -= structure.name[0].maint.Be;
+			
+				// Check for for readiness to built the BCE
+				if ((matFe>10) && (matLi2>10) && (matH2O>10) && (matBe>10)){
+					if (bceActive){
+					} else {
+						console.log("BCE Build conditions met");
+						player.body.stop();
+						openDialog("", 3);
+					}			
+				}
+    		});
+    		turn--;   	
+    		turnText.setText(turn);
+    		turnText.update;
+    		if (turn <= 3){
+    			camera.shake(200);
+    		}
+    		if(bceActive){
+    			// Increment the size of the bosun cloud
+    			bosonCloud.setScale(1.25,1.25);
+    			if ( bosonCloud.alpha < 0.9 ){ 
+    				bosonCloud.setAlpha(bosonCloud.alpha + 0.2);
+    				
+    				if( bosonCloud.alpha > 0.8 ){
+    					bosonCloud.setScale(1.35,1.35);
+    					openDialog("Boson Cloud ready.\nShuttle approaching fast!", 3);
+    					if( turn > 3 ){ 
+    						turn = 3;
+    						turnText.setText(turn);
+    						turnText.update;
+    					}
+    				}
+    			}
+    		}
+			this.sound.play('turn');
+			console.log("Updated structures");
+			
+			if( turn < 1 ){
+				console.log("All done! Game over one way or the other");
+				//TODO Need to get this working - it didn't quite turn out. I want the player to move to where he can see the landing, then fade to black game over screen with a score of how many turns it took.
+				if (bosonCloud.alpha > 0.9){
+					this.physics.moveToObject(player, bosonCloud, 160);
+					landing = true;
+				} else {
+					landing = false;
+				}
+			}
+		}		
 	}
 	
 	// UI control events
 	function openDialog( dialogtext, size, icon1, icon2 ) {
 		console.log ("Summon dialog for: " + dialogtext + ", " + size);	
 		runningMode = false;	
-		if( size == 1 ){	
+		if( size == 0 ){	
+			uiDialogTxt.setText(dialogtext);
+			uiDialogTxt.update;		
+			menuDialog.visible = true;
+		}
+		else if( size == 1 ){	
 			uiMessageTxt.setText(dialogtext);
 			uiMessageTxt.update;		
 			menuMessage.visible = true;
@@ -505,6 +610,9 @@
 			uiBuildTxt.setText(dialogtext);
 			uiBuildTxt.update;
 			menuBuild.visible = true;
+		}
+		else if( size == 3 ) {
+			menuBCE.visible = true;
 		} else {
 			uiDialogTxt.setText(dialogtext);
 			uiDialogTxt.update;
@@ -516,6 +624,7 @@
 		menuDialog.visible = false;
 		menuMessage.visible = false;
 		menuBuild.visible = false;
+		menuBCE.visible = false;
 		runningMode = true;
 	}
 	
@@ -523,7 +632,9 @@
 	// Gameshell keymapping support
 	function btnStart() {
 		console.log ("Pressed Start");
-		openDialog("Message", 1);	
+		//openDialog("Message", 1);
+		//console.log(JSON.stringify(shuttle));
+		
 	}
 	function btnSelect() {
 		console.log ("Pressed Select");	
@@ -552,12 +663,34 @@
 	}
 	function btnA() {
 		console.log ("Pressed A");
+		if (storyIntro == 1){
+			storyIntro++;
+			openDialog(story.intro.text2,0);
+		}
+		else if (storyIntro == 2){
+			storyIntro++;
+			openDialog(story.intro.text3,0);
+		}
+		else if(storyIntro == 3){
+			storyIntro = 0;
+			uiDialogTitle.setText("Press B to close");
+			uiDialogTitle.update;
+			openDialog(story.intro.text4,0);
+		}
+		
 		if (menuBuild.visible) {
 			// Building
 			console.log("Building " + buildNext.title);
 			closeDialog();
 			uiBuildIcon1.clearTint();
 			uiBuildIcon2.clearTint();
+			buildStructure();
+		}
+		if (menuBCE.visible) {
+			// Building BCE
+			buildNext = assemblies.bce;
+			console.log("Building " + buildNext.title);
+			closeDialog();
 			buildStructure();
 		}
 	}
@@ -568,9 +701,6 @@
 		uiBuildIcon1.clearTint();
 		uiBuildIcon2.clearTint();
 	}
-	
-		
-
 	
 	
 	
