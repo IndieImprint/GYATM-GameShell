@@ -58,10 +58,10 @@
 	let ice;
 	let beryllium;
 	let score = 0;
-	let matFe = 22;
-	let matLi2 = 20;
-	let matH2O = 25;
-	let matBe = 20;
+	let matFe = 202;
+	let matLi2 = 200;
+	let matH2O = 205;
+	let matBe = 200;
 	let story;
 	let storyIntro = 1;
 	let assemblies;
@@ -73,7 +73,9 @@
 	let bceActive;
 	let bosonCloud;
 	let shuttle;
-	let landing = 0;
+	let landing;
+	let timer;
+	let credits;
 	
 	const config = {
 		type: Phaser.AUTO,
@@ -194,7 +196,10 @@
 		this.input.keyboard.on('keydown_' + keypad.button.SELECT, function (event) { btnSelect() });
 		this.input.keyboard.on('keydown_' + keypad.button.START, function (event) { btnStart() });
 		
-		// UI Text		
+		// UI Text
+		credits = this.add.graphics();
+		credits.fillRect(0, 0, this.physics.world.bounds.width+10, this.physics.world.bounds.height+10);
+		credits.visible = false;
 		centerText = this.add.text(0, 0, '', { 
 			font: "50px 'PT Sans'",
 			fill: '#ffffff'
@@ -374,8 +379,8 @@
 		});
 		
 		// Set up assemblies and structures.
-		bosonCloud = this.add.image(-48, -48, 'bosoncloud').setOrigin(0.5,0.5).setScale(0.5,0.5).setDepth(1).setAlpha(0.15);
-		shuttle = this.physics.add.sprite(-48, -48, 'shuttle').setOrigin(0.5,0.5).setScale(1.5,1.5).setDepth(1);
+		bosonCloud = this.physics.add.sprite(-48, -48, 'bosoncloud').setOrigin(0.5,0.5).setScale(0.5,0.5).setDepth(1).setAlpha(0.15);
+		shuttle = this.physics.add.sprite(this.physics.world.bounds.width+48, this.physics.world.bounds.height+48, 'shuttle').setOrigin(0.5,0.5).setScale(1.5,1.5).setDepth(1);
 		this.anims.create({
 			key: 'boom',
 			frames: this.anims.generateFrameNumbers('boom', { start: 0, end: 10 }),
@@ -404,26 +409,26 @@
 		ice = this.physics.add.group();
 		beryllium = this.physics.add.group();
 		for(let i = 0; i < 10; i++) {
-			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
-			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
+			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-48);
+			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-48);
 			// Params are x, y, asset map, and asset id
 			iron.create(x, y, 'resources', 11);   
 		}			   
 		for(let i = 0; i < 5; i++) {
-			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
-			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
+			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-48);
+			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-48);
 			// Params are x, y, asset map, and asset id
 			dilithium.create(x, y, 'resources', 74);   
 		}	 
 		for(let i = 0; i < 8; i++) {
-			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
-			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
+			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-48);
+			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-48);
 			// Params are x, y, asset map, and asset id
 			ice.create(x, y, 'resources', 27);
 		}			   
 		for(let i = 0; i < 3; i++) {
-			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
-			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
+			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-48);
+			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-48);
 			// Params are x, y, asset map, and asset id
 			beryllium.create(x, y, 'resources', 58);   
 		}		   
@@ -433,14 +438,14 @@
 		this.physics.add.overlap(player, beryllium, onFindBeryllium, false, this);
 		
 		// Start the turn timer
-		setInterval(onTurn.bind(this), 60000);	 
+		//timer = setInterval(onTurn.bind(this), 60000);
+		timer = setInterval(onTurn.bind(this), 30000);	 
 	  
 	}
 		
 	
 	
 //////// Events
-	
 	function onWorldBounds (body) {
 		centerText.setText("Game Over ");
 		centerText.y = body.center.y -210;
@@ -451,8 +456,8 @@
 	// Resource events
 	function onFindIron (player, resource) {
 		// Move the resource to a new place
-		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
-		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
+		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-48);
+		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-48);
 		this.sound.play('click');	
 		matFe++;
 		uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
@@ -460,8 +465,8 @@
 	}
 	function onFindDilithium (player, resource) {
 		// Move the resource to a new place
-		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
-		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);			
+		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-48);
+		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-48);			
 		this.sound.play('click');
 		matLi2++;
 		uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
@@ -469,8 +474,8 @@
 	}
 	function onFindIce (player, resource) {
 		// Move the resource to a new place
-		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
-		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
+		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-48);
+		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-48);
 		this.sound.play('click');
 		matH2O++;
 		uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
@@ -478,8 +483,8 @@
 	}
 	function onFindBeryllium (player, resource) {
 		// Move the resource to a new place
-		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-32);
-		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-32);
+		resource.x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-48);
+		resource.y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-48);
 		this.sound.play('click');
 		matBe++;
 		uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
@@ -546,9 +551,10 @@
 				// Check for for readiness to built the BCE
 				if ((matFe>10) && (matLi2>10) && (matH2O>10) && (matBe>10)){
 					if (bceActive){
+						// Nothing
+						console.log("Would show BCE build dialog");
 					} else {
 						console.log("BCE Build conditions met");
-						player.body.stop();
 						openDialog("", 3);
 					}			
 				}
@@ -556,23 +562,17 @@
     		turn--;   	
     		turnText.setText(turn);
     		turnText.update;
-    		if (turn <= 3){
-    			camera.shake(200);
+    		if ((turn < 4) && (turn > 0)) {
+    			openDialog("The Shuttle will be here in " + turn + " Turns!", 1);
     		}
     		if(bceActive){
     			// Increment the size of the bosun cloud
     			bosonCloud.setScale(1.25,1.25);
     			if ( bosonCloud.alpha < 0.9 ){ 
-    				bosonCloud.setAlpha(bosonCloud.alpha + 0.2);
-    				
+    				bosonCloud.setAlpha(bosonCloud.alpha + 0.2);   				
     				if( bosonCloud.alpha > 0.8 ){
     					bosonCloud.setScale(1.35,1.35);
-    					openDialog("Boson Cloud ready.\nShuttle approaching fast!", 3);
-    					if( turn > 3 ){ 
-    						turn = 3;
-    						turnText.setText(turn);
-    						turnText.update;
-    					}
+    					openDialog("Boson Cloud ready.\nShuttle approaching fast!", 1);
     				}
     			}
     		}
@@ -581,29 +581,84 @@
 			
 			if( turn < 1 ){
 				console.log("All done! Game over one way or the other");
+				clearInterval(timer); // Stop the turns
+				// Close the dialog so that it's not covering the shuttle
+				closeDialog();
 				//TODO Need to get this working - it didn't quite turn out. I want the player to move to where he can see the landing, then fade to black game over screen with a score of how many turns it took.
-				if (bosonCloud.alpha > 0.9){
-					this.physics.moveToObject(player, bosonCloud, 160);
-					landing = true;
-				} else {
-					landing = false;
+				if (bosonCloud.alpha > 0.9){				
+					player.setPosition(bosonCloud.x -5, bosonCloud.y +65);					
+					this.physics.moveToObject(shuttle, bosonCloud, 300);
+					let shuttlecollider = this.physics.add.overlap(shuttle, bosonCloud, function (shuttleLanded) {
+						shuttle.setPosition(bosonCloud.x,bosonCloud.y);
+						shuttle.body.stop();
+						this.physics.world.removeCollider(shuttlecollider);
+						landing = true;
+						setTimeout(safeLanding.bind(this), 10);
+						landing = true;
+						console.log("Landed!");
+					}, null, this);
+					//setTimeout(safeLanding.bind(this), 4000);
+					
+				} else {					
+					player.body.stop();
+					this.physics.moveToObject(shuttle, player, 300);
+					let shuttlecollider = this.physics.add.overlap(shuttle, player, function (shuttleLanded) {
+						shuttle.setPosition(player.x,player.y);
+						shuttle.body.stop();
+						this.physics.world.removeCollider(shuttlecollider);
+						landing = false;
+						setTimeout(crashLanding.bind(this), 10);
+						console.log("Crashed!");
+					}, null, this);
+					//setTimeout(crashLanding.bind(this), 4000);
 				}
 			}
 		}		
 	}
+	function safeLanding() {
+		bosonCloud.setAlpha = 0.7;
+		camera.shake(300);
+		this.physics.moveTo(bosonCloud, -100,-200, 50);
+		console.log("Victory");
+		for (let i = 0; i < 5; i++){
+			let placeX = Phaser.Math.RND.between(shuttle.x+30, shuttle.x+60);
+			let placeY = Phaser.Math.RND.between(shuttle.y+10, shuttle.y+125);
+			this.physics.add.sprite(placeX, placeY, 'avatar');
+		}
+		setTimeout(endGame.bind(this), 5000);
+	}
+	function crashLanding() {
+		camera.shake(300);
+		shuttle.anims.play('boom',false);
+		player.visible = false;
+		console.log("Defeat");
+		setTimeout(endGame.bind(this), 5000);
+	}
+	function endGame() {		
+		credits.fillStyle(0x000000, 0.9);
+		credits.visible = true;
+		credits.setDepth(2);
+		menuDialog.setDepth(2);
+		runningMode = false;
+		if (landing) {
+			openDialog(story.win.text + story.credits.text);
+		} else {
+			openDialog(story.lose.text + story.credits.text);
+		}
+		uiDialogTitle.setText("Press Menu to exit");
+		setTimeout(nw.App.closeAllWindows(), 30000);
+	}
 	
 	// UI control events
 	function openDialog( dialogtext, size, icon1, icon2 ) {
-		console.log ("Summon dialog for: " + dialogtext + ", " + size);	
-		runningMode = false;	
-		if( size == 0 ){	
-			uiDialogTxt.setText(dialogtext);
-			uiDialogTxt.update;		
-			menuDialog.visible = true;
-		}
-		else if( size == 1 ){	
+		// Close and open dialogs and halt and clear player forces
+		closeDialog();
+		player.body.stop();
+		console.log ("Summon dialog for: " + dialogtext + ", " + size);
+		runningMode = false;
+		if( size == 1 ){
 			uiMessageTxt.setText(dialogtext);
-			uiMessageTxt.update;		
+			uiMessageTxt.update;
 			menuMessage.visible = true;
 		}
 		else if( size == 2 ) {
@@ -616,7 +671,7 @@
 		} else {
 			uiDialogTxt.setText(dialogtext);
 			uiDialogTxt.update;
-			menuDialog.visible = true;		
+			menuDialog.visible = true;
 		}
 	}
 	function closeDialog() {
@@ -626,14 +681,16 @@
 		menuBuild.visible = false;
 		menuBCE.visible = false;
 		runningMode = true;
+		if (menuDialog.visible && landing) { w.App.closeAllWindows(); }
+		else if (menuDialog.visible && !landing) { w.App.closeAllWindows(); }
 	}
 	
 	
 	// Gameshell keymapping support
 	function btnStart() {
 		console.log ("Pressed Start");
-		//openDialog("Message", 1);
-		//console.log(JSON.stringify(shuttle));
+		landing=true;
+		endGame();
 		
 	}
 	function btnSelect() {
@@ -659,23 +716,27 @@
 	}
 	function btnY() {
 		console.log ("Pressed Y");
-		openDialog("Choose new building", 2);
+		if( menuDialog.visible || menuMessage.visible || menuBCE.visible || menuBuild.visible ){
+		 // Don't open the dialog
+		} else {
+			openDialog("Choose new building", 2);
+		}
 	}
 	function btnA() {
 		console.log ("Pressed A");
 		if (storyIntro == 1){
 			storyIntro++;
-			openDialog(story.intro.text2,0);
+			openDialog(story.intro.text2);
 		}
 		else if (storyIntro == 2){
 			storyIntro++;
-			openDialog(story.intro.text3,0);
+			openDialog(story.intro.text3);
 		}
 		else if(storyIntro == 3){
 			storyIntro = 0;
 			uiDialogTitle.setText("Press B to close");
 			uiDialogTitle.update;
-			openDialog(story.intro.text4,0);
+			openDialog(story.intro.text4);
 		}
 		
 		if (menuBuild.visible) {
@@ -697,6 +758,10 @@
 	function btnB() {
 		console.log ("Pressed B");
 		console.log ("Running mode: " + runningMode);
+		if ( storyIntro < 4 ){ 
+			// They skipped out of the intro, so don't bring it back up
+			storyIntro = 5; 
+		}
 		closeDialog();
 		uiBuildIcon1.clearTint();
 		uiBuildIcon2.clearTint();

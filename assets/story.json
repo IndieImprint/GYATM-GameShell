@@ -3,7 +3,7 @@
     "author": "Indie Imprint",
     "site": "https://www.indieimprint.com",
     "copyright": "Copyright © 2018, 2019 Indie Imprint",
-    "turns": 6,
+    "turns": 3,
     "intro": {
     	"text": "Welcome to Mars!\n\nBuild the Bosun Cloud Exciter before the Colonist Shuttle arrives or they won't slow down enough... and will die on impact",
     	"text2": "The base will generate water and iron, but you need to collect enough additional dilithium and beryllium to build the BCE and keep it running",
@@ -11,40 +11,20 @@
     	"text4": "Good Luck!\nThe Colonists are counting on you",
     	"full": true
     },
-    "1": {
-    	"title": "Get Your Ass to Mars",
-    	"full": false
-    },
-    "2": {
-    	"title": "Get Your Ass to Mars",
-    	"full": false
-    },
-    "3": {
-    	"title": "Get Your Ass to Mars",
-    	"full": false
-    },
-    "4": {
-    	"title": "Get Your Ass to Mars",
-    	"full": false
-    },
-    "5": {
-    	"title": "Get Your Ass to Mars",
-    	"full": false
-    },
     "bce_build": {
-    	"text": "Congrats! \nTime to build the Boson Cloud Exciter. \nProduces a cloud of particles to decelerate the Settler Pod",
+    	"text": "Congrats! \nTime to build the Boson Cloud Exciter. \nProduces a cloud of particles to decelerate the Settler Pod\nRequires 3 turns.",
     	"full": false
     },
-    "death": {
-    	"title": "Get Your Ass to Mars",
+    "lose": {
+    	"text": "Everyone has died\n\n",
     	"full": true
     },
     "win": {
-    	"title": "Get Your Ass to Mars",
+    	"text": "Colonists arrived safely, \nthanks to your help!\n\n",
     	"full": true
     },
     "credits": {
-    	"text": "Art Assets by: \nKenney.nl \nClint Bellanger \nBuch",
+    	"text": "Art Assets by:\nKenney.nl\nArdinator\nPjcr\nEnterbrain\nClint Bellanger\nBuch",
     	"full": true
     }
     
