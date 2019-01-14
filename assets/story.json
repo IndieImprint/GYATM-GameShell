@@ -20,11 +20,11 @@
     	"full": true
     },
     "win": {
-    	"text": "Colonists arrived safely, \nthanks to your help!\n\n",
+    	"text": "Colonists arrived safely,\nthanks to your help!\n\n",
     	"full": true
     },
     "credits": {
-    	"text": "Art Assets by:\nKenney.nl\nArdinator\nPjcr\nEnterbrain\nClint Bellanger\nBuch",
+    	"text": "Art Assets by:\nKenney.nl\nArdinator, Pjcr, Enterbrain\nClint Bellanger\nBuch",
     	"full": true
     }
     
