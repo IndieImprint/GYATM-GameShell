@@ -3,7 +3,7 @@
     "author": "Indie Imprint",
     "site": "https://www.indieimprint.com",
     "copyright": "Copyright © 2018, 2019 Indie Imprint",
-    "turns": 3,
+    "turns": 15,
     "intro": {
     	"text": "Welcome to Mars!\n\nBuild the Bosun Cloud Exciter before the Colonist Shuttle arrives or they won't slow down enough... and will die on impact",
     	"text2": "The base will generate water and iron, but you need to collect enough additional dilithium and beryllium to build the BCE and keep it running",

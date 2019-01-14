@@ -58,17 +58,17 @@
 	let ice;
 	let beryllium;
 	let score = 0;
-	let matFe = 202;
-	let matLi2 = 200;
-	let matH2O = 205;
-	let matBe = 200;
+	let matFe = 2;
+	let matLi2 = 0;
+	let matH2O = 5;
+	let matBe = 0;
 	let story;
 	let storyIntro = 1;
 	let assemblies;
 	let occupiedLotsX = []; // JS has no 2D array, so we'll use the array entry num for X (or Y), and 0/1 for occupied
 	let occupiedLotsY = [];
 	let runningMode = false;
-	let turn = 30;
+	let turn = 15;
 	let turnText;
 	let bceActive;
 	let bosonCloud;
@@ -438,7 +438,6 @@
 		this.physics.add.overlap(player, beryllium, onFindBeryllium, false, this);
 		
 		// Start the turn timer
-		//timer = setInterval(onTurn.bind(this), 60000);
 		timer = setInterval(onTurn.bind(this), 30000);	 
 	  
 	}
@@ -547,12 +546,16 @@
 				matLi2 -= structure.name[0].maint.Li2;
 				matH2O -= structure.name[0].maint.H2O;
 				matBe -= structure.name[0].maint.Be;
+				if( (matFe < 0) || (matLi2 < 0) || (matH2O < 0) || (matBe < 0) ){
+					// TODO: Make a unit stop producing if there are insufficient resources, if there's time
+					console.log("Uh oh, " + structure.name[0].title + "Is out of resources!");
+				}
 			
 				// Check for for readiness to built the BCE
 				if ((matFe>10) && (matLi2>10) && (matH2O>10) && (matBe>10)){
 					if (bceActive){
 						// Nothing
-						console.log("Would show BCE build dialog");
+						//console.log("Would show BCE build dialog");
 					} else {
 						console.log("BCE Build conditions met");
 						openDialog("", 3);
@@ -584,7 +587,6 @@
 				clearInterval(timer); // Stop the turns
 				// Close the dialog so that it's not covering the shuttle
 				closeDialog();
-				//TODO Need to get this working - it didn't quite turn out. I want the player to move to where he can see the landing, then fade to black game over screen with a score of how many turns it took.
 				if (bosonCloud.alpha > 0.9){				
 					player.setPosition(bosonCloud.x -5, bosonCloud.y +65);					
 					this.physics.moveToObject(shuttle, bosonCloud, 300);
@@ -597,7 +599,6 @@
 						landing = true;
 						console.log("Landed!");
 					}, null, this);
-					//setTimeout(safeLanding.bind(this), 4000);
 					
 				} else {					
 					player.body.stop();
@@ -610,7 +611,6 @@
 						setTimeout(crashLanding.bind(this), 10);
 						console.log("Crashed!");
 					}, null, this);
-					//setTimeout(crashLanding.bind(this), 4000);
 				}
 			}
 		}		
@@ -632,7 +632,7 @@
 		shuttle.anims.play('boom',false);
 		player.visible = false;
 		console.log("Defeat");
-		setTimeout(endGame.bind(this), 5000);
+		setTimeout(endGame.bind(this), 4000);
 	}
 	function endGame() {		
 		credits.fillStyle(0x000000, 0.9);
@@ -646,7 +646,7 @@
 			openDialog(story.lose.text + story.credits.text);
 		}
 		uiDialogTitle.setText("Press Menu to exit");
-		setTimeout(nw.App.closeAllWindows(), 30000);
+		//setTimeout(nw.App.closeAllWindows(), 30000);
 	}
 	
 	// UI control events
@@ -654,7 +654,7 @@
 		// Close and open dialogs and halt and clear player forces
 		closeDialog();
 		player.body.stop();
-		console.log ("Summon dialog for: " + dialogtext + ", " + size);
+		//console.log ("Summon dialog for: " + dialogtext + ", " + size);
 		runningMode = false;
 		if( size == 1 ){
 			uiMessageTxt.setText(dialogtext);
@@ -681,16 +681,13 @@
 		menuBuild.visible = false;
 		menuBCE.visible = false;
 		runningMode = true;
-		if (menuDialog.visible && landing) { w.App.closeAllWindows(); }
-		else if (menuDialog.visible && !landing) { w.App.closeAllWindows(); }
 	}
 	
 	
 	// Gameshell keymapping support
 	function btnStart() {
 		console.log ("Pressed Start");
-		landing=true;
-		endGame();
+		// TODO add a menu here with difficulty settings if there is time
 		
 	}
 	function btnSelect() {
