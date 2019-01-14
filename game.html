@@ -318,8 +318,8 @@
 			color: 'white',
 			wordWrap: { width: uiBCEBg.width }
 		}).setScrollFactor(0).setOrigin(0.5,0.5);
-		let uiBCEIconBg = this.add.image(dWidth/2, uiBCEBg.height -64, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1);	
-		let uiBCEIcon = this.add.image(dWidth/2, uiBCEBg.height -67, assemblies.bce.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
+		let uiBCEIconBg = this.add.image(dWidth/2, uiBCEBg.height -62, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1);	
+		let uiBCEIcon = this.add.image(dWidth/2, uiBCEBg.height -65, assemblies.bce.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
 		menuBCE.add(uiBCEBg);
 		menuBCE.add(uiBCEIconBg);
 		menuBCE.add(uiBCEIcon);
@@ -408,19 +408,19 @@
 		dilithium = this.physics.add.group();
 		ice = this.physics.add.group();
 		beryllium = this.physics.add.group();
-		for(let i = 0; i < 10; i++) {
+		for(let i = 0; i < 7; i++) {
 			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-48);
 			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-48);
 			// Params are x, y, asset map, and asset id
 			iron.create(x, y, 'resources', 11);   
 		}			   
-		for(let i = 0; i < 5; i++) {
+		for(let i = 0; i < 4; i++) {
 			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-48);
 			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-48);
 			// Params are x, y, asset map, and asset id
 			dilithium.create(x, y, 'resources', 74);   
 		}	 
-		for(let i = 0; i < 8; i++) {
+		for(let i = 0; i < 6; i++) {
 			let x = Phaser.Math.RND.between(32, this.physics.world.bounds.width-48);
 			let y = Phaser.Math.RND.between(32, this.physics.world.bounds.height-48);
 			// Params are x, y, asset map, and asset id
