@@ -45,6 +45,10 @@
 	let uiBuildTxt;
 	let uiBuildIcon1;
 	let uiBuildIcon2;
+	let uiBuildIcon3;
+	let uiBuildIconBg1;
+	let uiBuildIconBg2;
+	let uiBuildIconBg3;
 	let buildNext;
 	let menuMats;
 	let menuMatsTween;
@@ -216,26 +220,17 @@
 		
 		// Materials Menu
 		menuMats = this.add.container();
-		let uiMatsBg = this.add.image(dWidth/2, 315, 'gui-screen').setOrigin(0.5).setScrollFactor(0).setScale(5, 0.25);
-		uiMatsTxt = this.add.text(-90, 290, 'Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe, { 
-			font: "25px 'PT Sans'",
+		let uiMatsBg = this.add.image(dWidth/5, dHeight, 'gui-screen').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.35, 0.16).setAlpha(0.7);
+		uiMatsTxt = this.add.text(dWidth/6, dHeight, 'Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe, { 
+			font: "24px 'PT Sans'",
+			align: 'left',
 			color: 'white'
-		}).setScrollFactor(0);
+		}).setScrollFactor(0).setOrigin(0.5,0.5);
 		menuMats.add(uiMatsBg);
 		menuMats.add(uiMatsTxt);
 		menuMats.setDepth(1);
-		menuMats.y =+50;
-		menuMatsTween = this.tweens.add({
-			targets: menuMats,
-			y: menuMats.y - 50,
-			ease: 'Power1',
-			duration: 800,
-			delay: 500,
-			hold: 4000,
-			yoyo: true,
-			repeat: 0,
-			paused: true
-		});
+		menuMats.y =+ 60;
+		menuMats.visible = false;
 
 		// Large Dialog Menu
 		menuDialog = this.add.container();
@@ -284,21 +279,25 @@
 			align: 'center',
 			color: 'white'
 		}).setScrollFactor(0).setOrigin(0.5,0.5);
-		uiBuildTxt = this.add.text(dWidth/2,35, "Choose which building to build", { 
-			font: "26px 'PT Sans'",
+		uiBuildTxt = this.add.text(dWidth/2,15, "Choose which building to build", { 
+			font: "25px 'PT Sans'",
 			align: 'center',
 			color: 'white',
 			wordWrap: { width: uiBuildBg.width }
 		}).setScrollFactor(0).setOrigin(0.5,0.5);
-		let uiBuildIconBg1 = this.add.image(65, uiBuildBg.height -65, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1);
-		let uiBuildIconBg2 = this.add.image(uiBuildBg.width, uiBuildBg.height -65, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1);	
-		uiBuildIcon1 = this.add.image(65, uiBuildBg.height -68, assemblies.mine.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
-		uiBuildIcon2 = this.add.image(uiBuildBg.width, uiBuildBg.height -68, assemblies.gorignak.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
+		uiBuildIconBg1 = this.add.image(64, uiBuildBg.height -54, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1).setAlpha(.15);
+		uiBuildIconBg2 = this.add.image(uiBuildBg.width, uiBuildBg.height -54, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1).setAlpha(.15);	
+		uiBuildIconBg3 = this.add.image(uiBuildBg.width/2 + 32, uiBuildBg.height -109, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1).setAlpha(.15);
+		uiBuildIcon1 = this.add.image(64, uiBuildBg.height -54, assemblies.mine.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
+		uiBuildIcon2 = this.add.image(uiBuildBg.width, uiBuildBg.height -54, assemblies.gorignak.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
+		uiBuildIcon3 = this.add.image(uiBuildBg.width/2 + 32, uiBuildBg.height -109, assemblies.bce.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25).setAlpha(.15); // This unit unlocked later
 		menuBuild.add(uiBuildBg);
 		menuBuild.add(uiBuildIconBg1);
 		menuBuild.add(uiBuildIconBg2);
+		menuBuild.add(uiBuildIconBg3);
 		menuBuild.add(uiBuildIcon1);
 		menuBuild.add(uiBuildIcon2);
+		menuBuild.add(uiBuildIcon3);
 		menuBuild.add(uiBuildTitle);
 		menuBuild.add(uiBuildTxt);
 		menuBuild.setDepth(2);
@@ -506,16 +505,29 @@
 			if( (occupiedLotsX[squareX] == 0) || (occupiedLotsY[squareY] == 0) ){
 				// Now, can they afford it? Everything only costs Iron to build for now, just due to gamejam time constraints
 				if( buildNext.cost <= matFe ){
-					structures.create( player.x, bufferY, buildNext.asset).setImmovable().name = [buildNext, 100];
-					occupiedLotsX[squareX] = 1;
-					occupiedLotsY[squareY] = 1;
-					matFe -= buildNext.cost;
 					if( buildNext == assemblies.bce ){
-						matLi2 -= buildNext.cost;
-						matBe -= buildNext.cost;
-						matH2O -= buildNext.cost;
-						bceActive = true;
-						bosonCloud.setPosition(player.x,bufferY);
+						if( bceActive ){
+							console.log("Can't build 2 BCEs");
+							openDialog("BCE already built", 1);
+						} else {
+							matLi2 -= buildNext.cost;
+							matBe -= buildNext.cost;
+							matH2O -= buildNext.cost;
+							bceActive = true;
+							bosonCloud.setPosition(player.x,bufferY);
+							structures.create( player.x, bufferY, buildNext.asset).setImmovable().name = [buildNext, 100];
+							occupiedLotsX[squareX] = 1;
+							occupiedLotsY[squareY] = 1;
+							uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
+							uiMatsTxt.update;
+						}
+					} else {
+						matFe -= buildNext.cost;
+						structures.create( player.x, bufferY, buildNext.asset).setImmovable().name = [buildNext, 100];
+						occupiedLotsX[squareX] = 1;
+						occupiedLotsY[squareY] = 1;
+						uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
+						uiMatsTxt.update;				
 					}
 				} else {
 					openDialog(buildNext.title + " costs " + buildNext.cost + "Fe. \nYou only have " + matFe, 1);
@@ -553,6 +565,7 @@
 			
 				// Check for for readiness to built the BCE
 				if ((matFe>10) && (matLi2>10) && (matH2O>10) && (matBe>10)){
+					uiBuildIcon3.setAlpha(1);
 					if (bceActive){
 						// Nothing
 						//console.log("Would show BCE build dialog");
@@ -565,6 +578,8 @@
     		turn--;   	
     		turnText.setText(turn);
     		turnText.update;
+    		uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
+    		uiMatsTxt.update;
     		if ((turn < 4) && (turn > 0)) {
     			openDialog("The Shuttle will be here in " + turn + " Turns!", 1);
     		}
@@ -649,9 +664,10 @@
 	}
 	
 	// UI control events
-	function openDialog( dialogtext, size, icon1, icon2 ) {
+	function openDialog( dialogtext, size ) {
 		// Close and open dialogs and halt and clear player forces
 		closeDialog();
+		menuMats.visible = false;
 		player.body.stop();
 		//console.log ("Summon dialog for: " + dialogtext + ", " + size);
 		runningMode = false;
@@ -679,6 +695,7 @@
 		menuMessage.visible = false;
 		menuBuild.visible = false;
 		menuBCE.visible = false;
+		menuMats.visible = true;
 		runningMode = true;
 	}
 	
@@ -704,16 +721,8 @@
 	}
 	function btnX() {
 		console.log ("Pressed X");
-		console.log ("Summon materials menu");
 		uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
-		uiMatsTxt.update;
-		if(menuMatsTween.isPlaying()) {
-			console.log("Tween is playing");
-		} else {
-			console.log("Tween is not playing");
-			menuMatsTween.stop();
-			menuMatsTween.restart();
-		}	
+		uiMatsTxt.update;	
 	}
 	function btnY() {
 		console.log ("Pressed Y");
@@ -744,8 +753,9 @@
 			// Building
 			console.log("Building " + buildNext.title);
 			closeDialog();
-			uiBuildIcon1.clearTint();
-			uiBuildIcon2.clearTint();
+			uiBuildIconBg1.setAlpha(0.15);
+			uiBuildIconBg2.setAlpha(0.15);
+			uiBuildIconBg3.setAlpha(0.15);
 			buildStructure();
 		}
 		if (menuBCE.visible) {
@@ -764,8 +774,9 @@
 			storyIntro = 5; 
 		}
 		closeDialog();
-		uiBuildIcon1.clearTint();
-		uiBuildIcon2.clearTint();
+		uiBuildIconBg1.setAlpha(0.15);
+		uiBuildIconBg2.setAlpha(0.15);
+		uiBuildIconBg3.setAlpha(0.15);
 	}
 	
 	
@@ -796,17 +807,35 @@
 		else{
 			if (menuBuild.visible) {
 				if (cursors.left.isDown) {
-					uiBuildIcon1.setTint(0x009dff);
-					uiBuildIcon2.clearTint();
+					uiBuildIconBg1.setAlpha(1);
+					uiBuildIconBg2.setAlpha(0.15);
+					uiBuildIconBg3.setAlpha(0.15);
 					buildNext = assemblies.gorignak;
 					uiBuildTxt.setText(assemblies.gorignak.title + "\n\n" + assemblies.gorignak.desc);
 					uiBuildTxt.update;					
 				}
 				else if (cursors.right.isDown) {
-					uiBuildIcon2.setTint(0x009dff);
-					uiBuildIcon1.clearTint();
+					uiBuildIconBg1.setAlpha(0.15);
+					uiBuildIconBg2.setAlpha(1);
+					uiBuildIconBg3.setAlpha(0.15);
 					buildNext = assemblies.mine;
 					uiBuildTxt.setText(assemblies.mine.title + "\n\n" + assemblies.mine.desc);
+				}
+				else if (cursors.up.isDown){
+					uiBuildIconBg1.setAlpha(0.15);
+					uiBuildIconBg2.setAlpha(0.15);
+					uiBuildIconBg3.setAlpha(1);
+					if ((matFe>10) && (matLi2>10) && (matH2O>10) && (matBe>10)){
+						uiBuildIcon3.setAlpha(1);
+						if (bceActive) {
+							uiBuildTxt.setText(assemblies.bce.title + "\n\n Already Built");
+						} else {
+							uiBuildTxt.setText(assemblies.bce.title + "\n\n" + assemblies.bce.desc);
+							buildNext = assemblies.bce;
+						}
+					} else {
+						uiBuildTxt.setText("Insufficient Resources to build " + assemblies.bce.title);
+					}
 				}
 			}
 		}

@@ -8,7 +8,7 @@
     "intro": {
     	"text": "Welcome to Mars!\n\nBuild the Bosun Cloud Exciter before the Colonist Shuttle arrives or they won't slow down enough... and will die on impact",
     	"text2": "The base will generate water and iron, but you need to collect enough additional dilithium and beryllium to build the BCE and keep it running",
-    	"text3": "Press B to see your resource stockpile.\nY to build refineries\nMenu to give up \n\nThe shuttle is off!",
+    	"text3": "Press Y to build refineries that will speed up resource production\nMenu to give up \n\nThe shuttle is off!",
     	"text4": "Good Luck!\nThe Colonists are counting on you",
     	"full": true
     },
