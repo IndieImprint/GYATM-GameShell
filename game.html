@@ -646,7 +646,6 @@
 			openDialog(story.lose.text + story.credits.text);
 		}
 		uiDialogTitle.setText("Press Menu to exit");
-		//setTimeout(nw.App.closeAllWindows(), 30000);
 	}
 	
 	// UI control events
@@ -696,7 +695,12 @@
 	function btnMenu() {
 		console.log ("Pressed Menu");
 		// This is considered the 'Exit' button on Gameshell
-		nw.App.closeAllWindows();	
+		if(story.launcher){
+			game.pendingDestroy = true;
+			window.location.replace('../launcher.html');
+		} else {
+			nw.App.closeAllWindows();
+		}
 	}
 	function btnX() {
 		console.log ("Pressed X");
