@@ -546,12 +546,7 @@
 			structures.children.iterate(function (structure) {
 				console.log(JSON.stringify(structure.name[0].title + ' Health: ' + structure.name[1] + "%"));
 			
-				// Assembly production
-				console.log(structure.name[0].title + " Fe:" + structure.name[0].production.Fe);
-				matFe += structure.name[0].production.Fe;
-				matLi2 += structure.name[0].production.Li2;
-				matH2O += structure.name[0].production.H2O;
-				matBe += structure.name[0].production.Be;
+				
 			
 				// Assembly maint cost
 				matFe -= structure.name[0].maint.Fe;
@@ -559,8 +554,18 @@
 				matH2O -= structure.name[0].maint.H2O;
 				matBe -= structure.name[0].maint.Be;
 				if( (matFe < 0) || (matLi2 < 0) || (matH2O < 0) || (matBe < 0) ){
-					// TODO: Make a unit stop producing if there are insufficient resources, if there's time
 					console.log("Uh oh, " + structure.name[0].title + "Is out of resources!");
+					matFe = 0;
+					matLi2 = 0;
+					matH2O = 0;
+					matBe = 0;
+				} else {
+					// Assembly production
+					console.log(structure.name[0].title + " Fe:" + structure.name[0].production.Fe);
+					matFe += structure.name[0].production.Fe;
+					matLi2 += structure.name[0].production.Li2;
+					matH2O += structure.name[0].production.H2O;
+					matBe += structure.name[0].production.Be;
 				}
 			
 				// Check for for readiness to built the BCE
@@ -811,7 +816,7 @@
 					uiBuildIconBg2.setAlpha(0.15);
 					uiBuildIconBg3.setAlpha(0.15);
 					buildNext = assemblies.gorignak;
-					uiBuildTxt.setText(assemblies.gorignak.title + "\n\n" + assemblies.gorignak.desc);
+					uiBuildTxt.setText(assemblies.gorignak.title + ":\n" + assemblies.gorignak.desc);
 					uiBuildTxt.update;					
 				}
 				else if (cursors.right.isDown) {
@@ -819,7 +824,7 @@
 					uiBuildIconBg2.setAlpha(1);
 					uiBuildIconBg3.setAlpha(0.15);
 					buildNext = assemblies.mine;
-					uiBuildTxt.setText(assemblies.mine.title + "\n\n" + assemblies.mine.desc);
+					uiBuildTxt.setText(assemblies.mine.title + ":\n" + assemblies.mine.desc);
 				}
 				else if (cursors.up.isDown){
 					uiBuildIconBg1.setAlpha(0.15);
@@ -828,9 +833,9 @@
 					if ((matFe>10) && (matLi2>10) && (matH2O>10) && (matBe>10)){
 						uiBuildIcon3.setAlpha(1);
 						if (bceActive) {
-							uiBuildTxt.setText(assemblies.bce.title + "\n\n Already Built");
+							uiBuildTxt.setText(assemblies.bce.title + ":\n Already Built");
 						} else {
-							uiBuildTxt.setText(assemblies.bce.title + "\n\n" + assemblies.bce.desc);
+							uiBuildTxt.setText(assemblies.bce.title + ":\n" + assemblies.bce.desc);
 							buildNext = assemblies.bce;
 						}
 					} else {
