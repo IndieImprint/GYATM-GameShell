@@ -162,8 +162,9 @@
 		this.load.json('assemblies','assets/assemblies.json');
 		this.load.audio('click', 'assets/click3.wav');
 		this.load.audio('turn', 'assets/on.wav');
-		this.load.audio('victorytheme', 'assets/Heavy_ConceptB.wav' )
-		this.load.audio('theme', 'assets/magic-space.mp3');
+		this.load.audio('victorytheme', 'assets/Heavy_ConceptB.wav');
+		// Gameshell might play OGG or WAV, but can't play MP3, it just crashes
+		this.load.audio('theme', ['assets/magic-space.ogg', 'assets/magic-space.wav', 'assets/magic-space.mp3']);
 	}
 
 	function create () {
