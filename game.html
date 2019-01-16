@@ -80,6 +80,7 @@
 	let landing;
 	let timer;
 	let credits;
+	let bgTheme;
 	
 	const config = {
 		type: Phaser.AUTO,
@@ -135,7 +136,7 @@
 		});
 		this.load.on('complete', function () {
 			console.log('complete');
-			setTimeout(function () { }, 7000);
+			setTimeout(function () { }, 4000);
 			progressBar.destroy ();
 			progressBox.destroy ();
 			loadingText.destroy ();
@@ -161,6 +162,8 @@
 		this.load.json('assemblies','assets/assemblies.json');
 		this.load.audio('click', 'assets/click3.wav');
 		this.load.audio('turn', 'assets/on.wav');
+		this.load.audio('victorytheme', 'assets/Heavy_ConceptB.wav' )
+		this.load.audio('theme', 'assets/magic-space.mp3');
 	}
 
 	function create () {
@@ -175,9 +178,7 @@
 		worldLayer.setCollisionByProperty({ edge: true });
 		this.physics.world.bounds.height = map.heightInPixels;
 		this.physics.world.bounds.width = map.widthInPixels;
-		this.physics.world.on('worldbounds', onWorldBounds);
-		
-		
+		this.physics.world.on('worldbounds', onWorldBounds);		
 		
 		// Camera settings
 		camera = this.cameras.main;
@@ -437,8 +438,18 @@
 		this.physics.add.overlap(player, beryllium, onFindBeryllium, false, this);
 		
 		// Start the turn timer
-		timer = setInterval(onTurn.bind(this), 30000);	 
-	  
+		timer = setInterval(onTurn.bind(this), 30000);
+		
+		// Start the theme
+		bgTheme = this.sound.add('theme',{
+			volume: story.volume,
+			delay: 100,
+			loop: true
+		});
+		if (story.music){
+			// Enable background music
+			bgTheme.play();	
+		}
 	}
 		
 	
@@ -544,9 +555,7 @@
 		if( !menuDialog.visible ){
 			// Skip the turn timer if the main dialog is open
 			structures.children.iterate(function (structure) {
-				console.log(JSON.stringify(structure.name[0].title + ' Health: ' + structure.name[1] + "%"));
-			
-				
+				//console.log(JSON.stringify(structure.name[0].title + ' Health: ' + structure.name[1] + "%"));				
 			
 				// Assembly maint cost
 				matFe -= structure.name[0].maint.Fe;
@@ -645,14 +654,14 @@
 			let placeY = Phaser.Math.RND.between(shuttle.y+10, shuttle.y+125);
 			this.physics.add.sprite(placeX, placeY, 'avatar');
 		}
-		setTimeout(endGame.bind(this), 5000);
+		setTimeout(endGame.bind(this), 7000);
 	}
 	function crashLanding() {
 		camera.shake(300);
 		shuttle.anims.play('boom',false);
 		player.visible = false;
 		console.log("Defeat");
-		setTimeout(endGame.bind(this), 4000);
+		setTimeout(endGame.bind(this), 5000);
 	}
 	function endGame() {		
 		credits.fillStyle(0x000000, 0.9);
@@ -660,8 +669,10 @@
 		credits.setDepth(2);
 		menuDialog.setDepth(2);
 		runningMode = false;
+		bgTheme.stop();
 		if (landing) {
 			openDialog(story.win.text + story.credits.text);
+			this.sound.play('victorytheme');
 		} else {
 			openDialog(story.lose.text + story.credits.text);
 		}
@@ -684,6 +695,7 @@
 		else if( size == 2 ) {
 			uiBuildTxt.setText(dialogtext);
 			uiBuildTxt.update;
+			if ((matFe>10) && (matLi2>10) && (matH2O>10) && (matBe>10)){ uiBuildIcon3.setAlpha(1); }
 			menuBuild.visible = true;
 		}
 		else if( size == 3 ) {
@@ -726,8 +738,12 @@
 	}
 	function btnX() {
 		console.log ("Pressed X");
-		uiMatsTxt.setText('Fe:' + matFe + ' Li2:' + matLi2 + ' H2O:' + matH2O + ' Be:' + matBe);
-		uiMatsTxt.update;	
+		console.log ("Mute soundtrack");
+		if (bgTheme.mute){
+			bgTheme.setMute(false);
+		} else {
+			bgTheme.setMute(true);
+		}
 	}
 	function btnY() {
 		console.log ("Pressed Y");
