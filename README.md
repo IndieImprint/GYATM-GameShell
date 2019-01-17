@@ -1,10 +1,15 @@
 # GYATM-GameShell
 Get Your Ass To Mars, GameShell edition
-
+<br />
+<img src="https://github.com/IndieImprint/GYATM-GameShell/blob/master/assets/GYATM-icon.png" height="64"/>
+<br />
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
 
 <p>This project is for the GameShell 2019 Game Jam<br />
-Current state is ready for round 1 Beta testing, missing only a difficulty menu and some tuning.</p>
+Current state is ready for round 1 Beta testing, missing only a difficulty menu and some tuning. The fork for GSP is already built, ready to be submitted when we're out of Beta</p>
+
+## Screenshot
+<img src="https://github.com/IndieImprint/GYATM-GameShell/blob/master/thumbnail.PNG" height="128" />
 
 ## Install guide for Clockwork OS v0.2
 <ol>
