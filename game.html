@@ -290,8 +290,8 @@
 		uiBuildIconBg1 = this.add.image(64, uiBuildBg.height -54, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1).setAlpha(.15);
 		uiBuildIconBg2 = this.add.image(uiBuildBg.width, uiBuildBg.height -54, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1).setAlpha(.15);	
 		uiBuildIconBg3 = this.add.image(uiBuildBg.width/2 + 32, uiBuildBg.height -109, 'gui-icon').setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1,1).setAlpha(.15);
-		uiBuildIcon1 = this.add.image(64, uiBuildBg.height -54, assemblies.mine.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
-		uiBuildIcon2 = this.add.image(uiBuildBg.width, uiBuildBg.height -54, assemblies.gorignak.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
+		uiBuildIcon1 = this.add.image(64, uiBuildBg.height -54, assemblies.gorignak.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
+		uiBuildIcon2 = this.add.image(uiBuildBg.width, uiBuildBg.height -54, assemblies.mine.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25);
 		uiBuildIcon3 = this.add.image(uiBuildBg.width/2 + 32, uiBuildBg.height -109, assemblies.bce.asset).setOrigin(0.5, 0.5).setScrollFactor(0).setScale(1.25,1.25).setAlpha(.15); // This unit unlocked later
 		menuBuild.add(uiBuildBg);
 		menuBuild.add(uiBuildIconBg1);
@@ -730,9 +730,9 @@
 	function btnMenu() {
 		console.log ("Pressed Menu");
 		// This is considered the 'Exit' button on Gameshell
-		if(story.launcher){
+		if(story.launcher.enabled){
 			game.pendingDestroy = true;
-			window.location.replace('../launcher.html');
+			window.location.replace(story.launcher.dest);
 		} else {
 			nw.App.closeAllWindows();
 		}
@@ -851,6 +851,7 @@
 						uiBuildIcon3.setAlpha(1);
 						if (bceActive) {
 							uiBuildTxt.setText(assemblies.bce.title + ":\n Already Built");
+							buildNext = '';
 						} else {
 							uiBuildTxt.setText(assemblies.bce.title + ":\n" + assemblies.bce.desc);
 							buildNext = assemblies.bce;
