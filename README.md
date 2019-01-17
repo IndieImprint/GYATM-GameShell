@@ -13,10 +13,10 @@ Current state is ready for round 1 Beta testing, missing only a difficulty menu 
   <li>mkdir gyatm</li>
   <li>edit menu.json to add the new entry</li>
   <li>Add a new entry to the list (make sure to add a comma after the prior item): 
-    ```{
+    {
          "title": "GYATM",
          "directory": "gyatm/"
-    }```
+    }
   </li>
   <li>cd gyatm</li>
   <li>git init</li>
